@@ -1,12 +1,44 @@
 resource "aws_instance" "terraform" {
-    count = 10
     ami = "ami-0220d79f3f480ecf5"
     instance_type = "t3.micro"
     vpc_security_group_ids = [aws_security_group.allow_all.id]
     tags = {
-        Name = var.instances[count.index]
+        Name = "terraform-1"
         Terraform = "true"
     }
+
+    provisioner "local-exce"{
+      command = "echo ${self.private_ip} > inventory"
+      on_failure = continue
+    }
+
+    provisioner "local-exec" {
+      command = "echo Instance Created"
+      when = destroy
+    }
+
+    connection {
+    type        = "ssh"
+    user        = "ec2_user" # or 'ec2-user', 'centos', etc.
+    password =  "DevOps321"
+    host        = self.public_ip
+  }
+
+    provisioner "remote-exec" {
+      inline = [
+          "sudo dnf install nginx -y",
+          "sudo systemctl start nginx",
+    ]
+  }
+
+    provisioner "remote-exec" {
+      inline = [
+          "sudo systemctl stop nginx server",
+          "echo 'nginx server stoped successfully' ",
+    ]
+    when = destroy
+  }
+    
 }
 
 resource "aws_security_group" "allow_all" {

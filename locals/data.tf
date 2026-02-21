@@ -21,12 +21,3 @@ data "aws_ami" "devops" {
 output "aws_ami" {
     value = data.aws_ami.devops.id
 }
-
-data "aws_instance" "mongodb" {
-    instance_id = "i-087ad09fff7e71337"
-
-}
-
-output "mongodb_info" {
-    value = data.aws_instance.mongodb.private_ip
-}
